@@ -6,7 +6,7 @@ import { collection, doc, onSnapshot } from "firebase/firestore";
 import { default as db } from '../../firebase';
 import axios from "axios";
 import { useSession } from 'next-auth/react'
-import SizeSelector from "../components/sizeSelector";
+import SizeSelector from "../components/SizeSelector";
 import { addItemToBasket, addItemToCollection, removeItemFromBasket } from "../utility/function";
 import NetworkErrorBoundary from '../components/NetworkErrorBoundary';
 import NoResult from "../components/NoResult";

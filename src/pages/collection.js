@@ -8,7 +8,7 @@ import axios from 'axios';
 import { useSession } from "next-auth/react"
 import Loading from '../components/Loading';
 import { addItemToBasket, addItemToCollection } from "../utility/function";
-import SizeSelector from "../components/sizeSelector";
+import SizeSelector from "../components/SizeSelector";
 
 function Collection() {
     const { data: session } = useSession()

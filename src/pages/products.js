@@ -6,7 +6,7 @@ import { default as db } from '../../firebase';
 import axios from "axios";
 import Image from 'next/image'
 import { useSession, getSession } from 'next-auth/react'
-import SortSelector from "../components/sortSelector";
+import SortSelector from "../components/SortSelector";
 import ProductFilter from '../components/ProductFilter'
 import { addItemToCollection } from "../utility/function";
 import { SORTING } from '../../constants'

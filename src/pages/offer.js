@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import { default as db } from '../../firebase';
-import SizeSelector from "../components/sizeSelector";
+import SizeSelector from "../components/SizeSelector";
 import { addItemToCollection } from "../utility/function";
 import HeartSolidIcon from '@heroicons/react/24/solid/HeartIcon';
 import HeartOutlineIcon from '@heroicons/react/24/outline/HeartIcon';

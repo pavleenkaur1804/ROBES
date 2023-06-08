@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react"
 import { loadStripe } from '@stripe/stripe-js'
 import useCartonListener from '../components/cartonListener';
 import { addItemToBasket, removeItemFromBasket } from "../utility/function"
-import SizeSelector from "../components/sizeSelector";
+import SizeSelector  from "../components/SizeSelector";
 
 const stripePromise = loadStripe(`${process.env.STRIPE_PUBLIC_KEY}`)
 
