@@ -26,7 +26,7 @@ function Checkout() {
           }
           return cartonObject;
         });
-        setBasketItem(updatedCartonItem);
+        setCartonItem(updatedCartonItem);
       };
       
     
@@ -36,7 +36,7 @@ function Checkout() {
             to the checkoutSession via the url returned from stripe api */
             await stripePromise;
             const checkoutSession = await axios.post('/api/create-checkout-session', {
-                    items: basketItem,
+                    items: cartonItem,
                     email: session.user.email
                 })
             router.push(checkoutSession.data.url);
@@ -81,7 +81,8 @@ function Checkout() {
                                 sizes={item.sizes} 
                                 selectedSize={item.selectedSize} 
                                 onChange={(size) => handleSizeChange(item, size)}
-                                basketItem={cartonItem} />
+                                // basketItem={cartonItem} 
+                                />
                             </div>
                             <p
                             className='mt-1'
