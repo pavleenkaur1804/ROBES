@@ -27,8 +27,6 @@ const Product = () => {
     const encodedSearchQuery = encodeURI(searchQuery || "");
     const handleSizeChange = (item, size) => {
         /* This updates the size in the local state: displayProduct */
-        console.log('item inside handleSizeChange inside product', item)
-        console.log('size inside handleSizeChange inside product', size)
         const updatedBasketItem = displayProduct.map((basketItem) => {
           if (basketItem.SKU === item.SKU) {
             return { ...basketItem, selectedSize: size };
@@ -51,8 +49,6 @@ const Product = () => {
                         session
                     });
                     products.push(...searchResponse.data.docs)
-                    console.log('searchresponse.data.docs', searchResponse.data.docs)
-                    console.log('products', products)
                     setDisplayProduct(products)
                     const userCollectionRef = collection(db, "users");
                     const usersDocRef = doc(userCollectionRef, session.user.email);
@@ -65,7 +61,6 @@ const Product = () => {
                     const unsubscribeCollection = onSnapshot(collectionRef, (snapshot) => {
                         setDisplayProduct((prevProduct) => {
                             const updatedProductArray = [...prevProduct];
-                            console.log('before setfilte coll', prevProduct)
                             snapshot.docChanges().forEach((change) => {
                                 const docData = change.doc.data();
                                 const productSKU = docData.productSKU;
@@ -82,7 +77,6 @@ const Product = () => {
 
                             });
 
-                            console.log('after setfilte coll', updatedProductArray)
                             return updatedProductArray;
                         })
                     });
@@ -90,14 +84,11 @@ const Product = () => {
                     const unsubscribeBask = onSnapshot(basketRef, (snapshot) => {
                         setDisplayProduct((prevProduct) => {
                             const updatedProductArray = [...prevProduct];
-                            console.log('before', prevProduct)
                             snapshot.docChanges().forEach((change) => {
-                                console.log('changeed')
                                 const docData = change.doc.data();
                                 const productSKU = docData.productSKU;
 
                                 const matchingProductIndex = updatedProductArray.findIndex((item) => item.SKU === productSKU);
-                                console.log('docData', docData)
                                 if (matchingProductIndex !== -1) {
                                     const updatedProduct = { ...updatedProductArray[matchingProductIndex] };
 
@@ -107,10 +98,9 @@ const Product = () => {
                                     updatedProductArray[matchingProductIndex] = updatedProduct;
                                 }
                             });
-                            console.log('after', updatedProductArray)
+                    
                             return updatedProductArray;
                         })
-           
                     });
                     setLoading(false); // Set loading state to true before making the API call
                 } catch (error) {

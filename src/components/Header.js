@@ -58,7 +58,7 @@ function Header() {
                         {!expanded && (<Image
                             onClick={() => router.push('/')}
                             key={Math.random()}
-                            src='https://hope-faith-12345678.s3.us-west-2.amazonaws.com/Robes+Logo.png'
+                            src='https://firebasestorage.googleapis.com/v0/b/project-1234-1a50f.appspot.com/o/Screenshot%202023-06-09%20at%2012.12.57%20AM.png?alt=media&token=b236a106-1d03-4e01-b44c-ad269a1cf063'
                             width={90}
                             height={40}
                             className="cursor-pointer ml-auto"
