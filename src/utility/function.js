@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const addItemToCollection = async (item, session) => {
     const product = {
-        SKU: item.SKU, name: item.name, price: item.price, image: item.image, brand: item.brand, color: item.color,
+        SKU: item.SKU, sizes: item.sizes, name: item.name, price: item.price, image: item.image, brand: item.brand, color: item.color,
     }
 
     // Sending the product as an action to the redux store.... collection slice
@@ -11,7 +11,7 @@ export const addItemToCollection = async (item, session) => {
         session,
         product,
     });
-console.log('session', session)
+    console.log('session', session)
     const response = await axios.post('/api/retrieveCollection', {
         session,
         value: 2,
@@ -28,15 +28,15 @@ export const addItemToBasket = async (item, size, session) => {
         session,
         product,
     });
-    
+
 }
 
-export const removeItemFromBasket = async (item, session) => {
+export const removeItemFromBasket = async (item, email) => {
     const product = {
         SKU: item.SKU, name: item.name, price: item.price, image: item.image, brand: item.brand, color: item.color,
     }
     const response = await axios.post('/api/removeBasket', {
-        session,
+        email,
         product,
     });
 }

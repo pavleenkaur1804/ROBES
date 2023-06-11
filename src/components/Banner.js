@@ -14,13 +14,13 @@ export default function Banner({images, height, width, className }) {
                 showThumbs={false}
                 interval={3000}>
                 <div>
-                    <img loading='lazy' src={images[0]} alt='' />
+                    <img src={images[0]} alt='Banner Image' />
                 </div>
                 <div>
-                    <img loading='lazy' src={images[1]} alt='' />
+                    <img src={images[1]} alt='Banner Image' />
                 </div>
                 <div>
-                    <img loading='lazy' src={images[2]} alt='' />
+                    <img src={images[2]} alt='Banner Image' />
                 </div>
             </Carousel>
         </div>

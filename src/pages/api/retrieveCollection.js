@@ -1,6 +1,8 @@
 import { collection, doc, getDocs, query, where } from "firebase/firestore";
 import { default as db } from '../../../firebase';
 
+/* This Api handles Retrieving Collection of the Active User */
+
 export default async (req, res) => {
     try {
         const allProductSKU = []

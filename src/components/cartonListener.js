@@ -29,7 +29,11 @@ const useCartonListener = (session, setCartonTotal, setCartonItem, setCartonPric
                     if (setCartonItem && setCartonPrice) {
                         const items = []
                         snapshot.docs.map((doc) => {
-                            items.push(doc.data())
+                            const document = {
+                                basketId:doc.id,
+                                ...doc.data()
+                            }
+                            items.push(document)
                         });
                         const filteredItems = products
                             .filter((product) => items.some((item) => item.productSKU === product.SKU))

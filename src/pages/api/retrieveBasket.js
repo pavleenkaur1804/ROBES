@@ -1,13 +1,15 @@
 import { collection, doc, getDocs, query, where } from "firebase/firestore";
 import { default as db } from '../../../firebase';
 
+/* This Api handles Retrieving Basket of the Active User */
+
 export default async (req, res) => {
     try {
         const allProductSKU = []
         let allProducts = []
-        const { session, value } = req.body
+        const { email, value } = req.body
         const userCollectionRef = collection(db, "users");
-        const usersDocRef = doc(userCollectionRef, session?.user?.email);
+        const usersDocRef = doc(userCollectionRef, email);
         const collectionsRef = collection(usersDocRef, "basket");
 
         const querySnapshot1 = await getDocs(collectionsRef);
@@ -42,9 +44,8 @@ export default async (req, res) => {
     }
            
         }
-
         res.status(200).send({ message: 'Retrieved Successfully!', data: value === 1 ? allProductSKU: allProducts })
-
+        // Resolve the Promise with the response data
     } catch (err) {
         console.log('err in retrieveBasket', err)
     }

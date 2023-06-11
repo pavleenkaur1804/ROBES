@@ -1,5 +1,8 @@
 import { buffer } from 'micro';
 import * as admin from 'firebase-admin';
+import removeBasket from './removeBasket'
+import { collection, doc, getDocs } from "firebase/firestore";
+import { default as db } from '../../../firebase';
 
 // Secure a connection to firebase from the backend
 const serviceAccount = require('../../../permissions.json')
@@ -13,7 +16,28 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
 
-const fulfillOrder = async (session) => {
+const fulfillOrder = async (session, items, res) => {
+    console.log('session.total_details.amount_shipping', session.total_details.amount_shipping)
+    console.log('session.amount_total', session.amount_total)
+    console.log('session.metadata.images', session.metadata.images)
+    console.log('admin.firestore.FieldValue.serverTimestamp()', admin.firestore.FieldValue.serverTimestamp())
+    console.log('items', items)
+
+    try {
+        for (let i = 0; i < items.length; i++) {
+            console.log('inside For')
+            await removeBasket({
+                body: {
+                    email: session.metadata.email,
+                    product: items[i]
+                }
+            }, res);
+        }
+    } catch (error) {
+        console.log('error in for loop remove basket', error)
+    }
+   
+   
     return app
         .firestore()
         .collection('users')
@@ -48,8 +72,30 @@ export default async (req, res) => {
 
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object;
+            const items = []
+            const userCollectionRef = collection(db, "users");
+            const usersDocRef = doc(userCollectionRef, session.metadata.email);
+            const collectionsRef = collection(usersDocRef, "basket");
+    
+            const querySnapshot1 = await getDocs(collectionsRef);
+    
+            querySnapshot1.forEach((doc) => {
+                try {
+                    const document = {
+                        SKU: doc.data().productSKU,
+                        ...doc.data()
+                    }
+                    items.push(document)
+    
+                } catch (e) {
+                    console.log('e', e)
+                }
+    
+            });
+         
             //   fulfill the order ...
-            return fulfillOrder(session)
+            console.log('response', items)
+            return fulfillOrder(session, items, res)
                 .then(() => res.status(200))
                 .catch((err) => res.status(400).send(`Webhook Error: ${err.message}`))
         }

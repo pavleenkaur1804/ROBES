@@ -40,10 +40,9 @@ const Search = () => {
                     const userBasketRef = collection(db, "users");
                     const userDocRef = doc(userBasketRef, session.user.email);
                     const basketRef = collection(userDocRef, 'basket');
-                    const unsubscribeCollection = onSnapshot(collectionRef, (snapshot) => {
+                    onSnapshot(collectionRef, (snapshot) => {
                         setSearchResults((prevProduct) => {
                             const updatedProductArray = [...prevProduct];
-                            console.log('before setfilte coll', prevProduct)
                             snapshot.docChanges().forEach((change) => {
                                 const docData = change.doc.data();
                                 const productSKU = docData.productSKU;
@@ -59,23 +58,18 @@ const Search = () => {
                                 }
 
                             });
-
-                            console.log('after setfilte coll', updatedProductArray)
                             return updatedProductArray;
                         })
                     });
 
-                    const unsubscribeBask = onSnapshot(basketRef, (snapshot) => {
+                    onSnapshot(basketRef, (snapshot) => {
                         setSearchResults((prevProduct) => {
                             const updatedProductArray = [...prevProduct];
-                            console.log('before', prevProduct)
                             snapshot.docChanges().forEach((change) => {
-                                console.log('changeed')
                                 const docData = change.doc.data();
                                 const productSKU = docData.productSKU;
 
                                 const matchingProductIndex = updatedProductArray.findIndex((item) => item.SKU === productSKU);
-                                console.log('docData', docData)
                                 if (matchingProductIndex !== -1) {
                                     const updatedProduct = { ...updatedProductArray[matchingProductIndex] };
 
@@ -84,7 +78,6 @@ const Search = () => {
                                     updatedProductArray[matchingProductIndex] = updatedProduct;
                                 }
                             });
-                            console.log('after', updatedProductArray)
                             return updatedProductArray;
                         })
                     });
@@ -94,22 +87,30 @@ const Search = () => {
             }
         };
         fetchSearchResults();
-    }, [searchQuery]);
+    }, [session, searchQuery]);
 
     return (
-        <>
-            <div
-        className="flex justify-between">
+        <div>
+           {loading=== true? 
+           <div
+           className="flex justify-center items-center"
+           >
+           <Loading/>
+           </div>
+          : <>
+           <div
+        className="flex justify-between font-sans">
         <h1
         className="block ml-6 text-gray-400 text-xs align-middle"
         >{searchResults.length ? `${searchResults.length} products found` : ""}</h1> 
         </div>
+       
              <div
         className={searchResults.length ? 'grid sm: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-col-5 gap-1': 'flex justify-center items-center'}
         >
-            {searchResults.length ? searchResults.map((result) => (
+            {(searchResults.length ? searchResults.map((result) => (
                 <div
-                    className="bg-gray-200"
+                    className=""
                     key={result.SKU}
                     >
                     <div className='flex flex-col bg-white p-11'>
@@ -139,7 +140,13 @@ const Search = () => {
                             {result.collection === true ? <HeartSolidIcon
                                 onClick={() => addItemToCollection(result, session)}
                                 className="h-6 cursor-pointer text-wendge" /> : <HeartOutlineIcon
-                                onClick={() => addItemToCollection(result, session)}
+                                onClick={
+                                    () => {
+                                        if(!session) router.push('/profile')
+                                        else {
+                                            addItemToCollection(result, session)
+                                        }
+                                    }}
                                 className="h-6 cursor-pointer text-wendge" />}
                             </div>
                         </div>            
@@ -147,9 +154,10 @@ const Search = () => {
                     </div>
                 </div>
 
-            )) : (loading ? <Loading/>: <NoResult/>)}
+            )) :  <NoResult/>)}
         </div>
-        </>
+           </>}
+        </div>
        
     );
 };

@@ -1,5 +1,7 @@
-import { collection, deleteDoc, doc, addDoc, getDocs, query, where, updateDoc, increment } from "firebase/firestore";
+import { collection, doc, getDocs } from "firebase/firestore";
 import { default as db } from '../../../firebase';
+
+/* This Api handles Retrieving the Address of the User */
 
 export default async (req, res) => {
   try {

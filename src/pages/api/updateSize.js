@@ -1,5 +1,6 @@
 import { collection, deleteDoc, doc, addDoc, getDocs, query, where, setDoc, updateDoc, increment } from "firebase/firestore";
 import { default as db } from '../../../firebase';
+import product from "./product";
 
 export default async (req, res) => {
   try {
@@ -7,6 +8,8 @@ export default async (req, res) => {
     /* QUERING USER referenced Product SKU DATA
     Check if already present */
     console.log('session inside API updateSize', session)
+    console.log('sizes', product.sizes)
+    console.log('selected in API updateSize', selectedSize)
     console.log('selected in API updateSize', selectedSize)
     if(selectedSize === undefined){
       selectedSize = sizes[0]

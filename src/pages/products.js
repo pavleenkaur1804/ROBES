@@ -26,12 +26,10 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
     const router = useRouter();
 
     const handleSortChange = event => {
-        console.log('event', event)
         setSelectedSort(event.target.value);
     };
 
     const handleFilter = (filteredProducts) => {
-        console.log('filtered', filteredProducts)
         setFilteredProducts(filteredProducts);
         setDisplayFilteredProducts(filteredProducts)
     };
@@ -53,12 +51,7 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
                     setDisplayFilteredProducts(products)
                     const userCollectionRef = collection(db, "users");
                     const usersDocRef = doc(userCollectionRef, session.user.email);
-                    // // Get a reference to the Firestore collection you want to monitor
                     const collectionRef = collection(usersDocRef, 'collection');
-                    const userBasketRef = collection(db, "users");
-                    const userDocRef = doc(userBasketRef, session.user.email);
-                    // Get a reference to the Firestore collection you want to monitor
-                    const basketRef = collection(userDocRef, 'basket');
                     const unsubscribeCollection = onSnapshot(collectionRef, (snapshot) => {
                         setDisplayFilteredProducts((prevProduct) => {
                             const updatedProductArray = [...prevProduct];
@@ -84,14 +77,19 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
             setLoading(false); // Set loading state to true before making the API call
         }
 
-    }, [selectedSort]);
+    }, [session,selectedSort]);
 
     return (
         <div
-            className={`${displayFilteredProducts && displayFilteredProducts.length ? '' : "flex font-mono justify-center items-center"}`}
-
-        >
-            {displayFilteredProducts && displayFilteredProducts.length ? <>
+            className='font-mono'
+        >        
+            {loading === true ? 
+            <div
+            className="flex justify-center items-center"
+            >
+                <Loading />
+            </div>
+            : (displayFilteredProducts && displayFilteredProducts.length ? <>
                 <div
                     className="flex">
                     <h1
@@ -107,6 +105,8 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
                             >
                                 <div className='flex flex-col p-11'>
                                     <Image
+                                    className="cursor-pointer"
+
                                         onClick={() => {
 
                                             const encodeSearchQuery = encodeURI(result.SKU)
@@ -114,7 +114,7 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
                                             router.push(`/product?q=${encodeSearchQuery}`);
                                         }
                                         }
-                                        src={result.image[3]} height={200} width={222} />
+                                        src={result.image[3]} height={200} width={222} alt={`${result.name}`} />
                                     <h1 className='my-3'>{result.name}</h1>
                                     <p className='text-xs my-2'>{`Color: ${result.color}`}</p>
                                     <p className='text-xs my-2'>{`Brand: ${result.brand}`}</p>
@@ -126,9 +126,19 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
                                         </div>
                                         <div className="flex">
                                             {result.collection === true ? <HeartSolidIcon
-                                                onClick={() => addItemToCollection(result, session)}
+                                                onClick={() => 
+                                                    addItemToCollection(result, session)
+                                                }
                                                 className="h-7 cursor-pointer text-wendge" /> : <HeartOutlineIcon
-                                                onClick={() => addItemToCollection(result, session)}
+                                                onClick={
+                                                    () => {
+                                                        if(!session) router.push('/profile')
+                                                        else {
+                                                            addItemToCollection(result, session)
+                                                        }
+                                                    }
+                                                   
+                                                }
                                                 className="h-7 cursor-pointer text-wendge" />}
                                         </div>
                                     </div>
@@ -152,7 +162,7 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
                         />
                     </div>
                 </div>
-            </> : (loading === true ? <Loading /> : <NoResult />)}
+            </> : <NoResult />)}
         </div>
     );
 };
@@ -162,12 +172,6 @@ export default Products;
 export async function getServerSideProps(context) {
     // Get the users logged in credentials
     const session = await getSession(context);
-    if (!session) {
-        return {
-            props: {}
-        }
-    }
-
     // get products from firebase db
     const products = await getDocs(query(
         collection(db, 'product'),
@@ -199,6 +203,7 @@ export async function getServerSideProps(context) {
     const colorArray = [...colorSet];
     const availableSizes = Array.from(new Set(allProducts.flatMap(item => item.sizes)));
     let productsWithoutTimestamp;
+    let arrayModifiedForBasket;
     if (session) {
         const userCollectionRef = collection(db, "users");
         const usersDocRef = doc(userCollectionRef, session.user.email);
@@ -232,7 +237,7 @@ export async function getServerSideProps(context) {
             collection: allCollection.some(collectionItem => collectionItem.productSKU === item.SKU)
         }));
 
-        const arrayModifiedForBasket = arrayModifiedForCollection.map(obj => {
+        arrayModifiedForBasket = arrayModifiedForCollection.map(obj => {
             const matchingItem = allBasket.find(item => item.productSKU === obj.SKU);
             const quantity = matchingItem ? matchingItem.quantity : 0;
 
@@ -242,10 +247,10 @@ export async function getServerSideProps(context) {
             };
         });
 
-        // Remove the timestamp property from each object in the products array
-        productsWithoutTimestamp = session ? arrayModifiedForBasket.map(({ timestamp, ...rest }) => rest) : allProducts
     }
-
+console.log('arrayModifiedForBAsket', arrayModifiedForBasket)
+    // Remove the timestamp property from each object in the products array
+    productsWithoutTimestamp = session ? arrayModifiedForBasket.map(({ timestamp, ...rest }) => rest) : allProducts.map(({ timestamp, ...rest }) => rest)
 
     return {
         props: {

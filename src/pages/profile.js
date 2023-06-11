@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { useSession, getSession } from 'next-auth/react'
+import { useSession, getSession, signIn } from 'next-auth/react'
 import { PlusIcon, ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { collection, doc, onSnapshot, getDocs, query, orderBy } from "firebase/firestore";
 import { default as db } from '../../firebase';
@@ -15,6 +15,7 @@ function Profile({ originalArray }) {
         landmark: "",
         default: ""
     });
+    const [loading, setLoading] = useState(true); // Add loading state
     const [addressArray, setAddressArray] = useState(originalArray);
     const [fillAddress, setfillAddress] = useState(false);
     const [selectedOption, setSelectedOption] = useState('');
@@ -52,6 +53,7 @@ function Profile({ originalArray }) {
         if (session) {
             const fetchAddress = async () => {
                 try {
+                    setLoading(true)
                     const userAddressRef = collection(db, "users");
                     const usersDocRef = doc(userAddressRef, session.user.email);
                     const addressRef = collection(usersDocRef, 'address');
@@ -102,16 +104,16 @@ function Profile({ originalArray }) {
                 }
             };
             fetchAddress();
+            setLoading(false)
         }
-    }, [selectedOption]);
+    }, [session,selectedOption]);
     return (
         <>
-            <div
-            className='font-mono m-5'
+         {session ? (
+                 <div
+            className='font-sans m-5'
         >
-            {session ? (
-                <>
-                    <div
+             <div
                         className='text-wendge text-sm p-6 space-y-2'
                     >
                         <h1
@@ -290,11 +292,16 @@ function Profile({ originalArray }) {
                             </div>
                         }
                     </div>
-
-                </>
-            )
-                : "Please Login"}
-        </div>
+        </div>)
+                : <div
+                    className='flex flex-grow justify-center items-center font-mono h-80'>
+                    <div
+                        onClick={signIn}
+                        className="cursor-pointer bg-wendge rounded-md text-gray-200 p-2 text-sm">
+                        Please Login
+                    </div>
+                </div>
+        }
         </>
         
     )

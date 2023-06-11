@@ -15,7 +15,7 @@ function Collection() {
     const [loading, setLoading] = useState()
     const [items, setItems] = useState([]);
     const [refresh, setRefresh] = useState();
-
+    const [warning, setWarning] = useState(false)
     const handleSizeChange = (item, size) => {
         /* This updates the size in the local state: items
         In summary, the handleSizeChange function is responsible 
@@ -57,8 +57,9 @@ function Collection() {
     }, [refresh]);
 
     return (
-        <div className={`${loading === true ? 'flex justify-center items-center' : ''}`}>{
-            loading === true ? (<Loading />) : (items.length !== 0 ? <main className='lg:flex max-w-screen-2xl mx-auto'>
+        <div className={`${loading === true ? 'flex justify-center items-center font-sans' : ''}`}>{
+            loading === true ? (<Loading />) : (items.length !== 0 ? <main
+            >
                 <div className='flex flex-col p-5 space-y-5 bg-white'>
                     <h1 className='text-md ml-5 text-wendge'>
                         {items.length === 0 ? "" : "Your Collection"}
@@ -92,20 +93,37 @@ function Collection() {
                                             className='text-sm'
                                             sizes={item.sizes}
                                             selectedSize={item.selectedSize}
-                                            onChange={(size) => handleSizeChange(item, size)}
+                                            onChange={(size) => 
+                                                {
+                                                    if(warning=== true){
+                                                        setWarning(false)
+                                                    }
+                                                    handleSizeChange(item, size)
+                                                }
+                                            }
                                         />
                                     </div>
+                                    {warning===true ?  <p
+                                 className="text-xs my-2 text-wendge"
+                                >Please select a size!</p> : <></>}
                                 </div>
                                 <div className="flex flex-col space-y-3 mx-auto justify-self-end">
-                                    <button className="button bg-wendge rounded-full text-sm" onClick={async () => {
-                                        await addItemToCollection(item, session)
-                                        addItemToBasket(item, item.selectedSize, session)
-                                        setRefresh(Math.random())
+                                    <button className="button bg-wendge rounded-full text-xs" onClick={async () => {
+                                        if(!session) router.push('/profile')
+                                        else {
+                                            if (item.selectedSize === undefined) {
+                                                setWarning(true)
+                                            } else {
+                                                await addItemToCollection(item, session)
+                                                addItemToBasket(item, item.selectedSize, session)
+                                                setRefresh(Math.random())
+                                            }
+                                        }
                                     }
                                     }>
                                         Add to Carton
                                     </button>
-                                    <button className="button bg-wendge rounded-full text-sm" onClick={async () => {
+                                    <button className="button bg-wendge rounded-full text-xs" onClick={async () => {
                                         await addItemToCollection(item, session)
                                         setRefresh(Math.random())
                                     }

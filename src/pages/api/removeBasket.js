@@ -1,20 +1,19 @@
 import { collection, deleteDoc, doc, getDocs, updateDoc, increment } from "firebase/firestore";
 import { default as db } from '../../../firebase';
 
+/* This Api handles Removing/Increasing Quantity of the Item */
+
 export default async (req, res) => {
   try {
-    const { session, product } = req.body;
-    console.log('session', session)
-    console.log('product', product)
+    const { email, product } = req.body;
     const userBasketRef = collection(db, "users");
-    const usersDocRef = doc(userBasketRef, session?.user?.email);
+    const usersDocRef = doc(userBasketRef, email);
     const basketsRef = collection(usersDocRef, "basket");
     const bucketRef = collection(db, "bucket");
     const querySnapshot1 = await getDocs(basketsRef);
     const allProductSKU = [];
     querySnapshot1.forEach((doc) => {
       try {
-        console.log('doc.id', doc.id);
         const document = {
           SKU: doc.data().productSKU,
           quantity: doc.data().quantity,
@@ -27,7 +26,6 @@ export default async (req, res) => {
     });
 
     const matchedProduct = allProductSKU.find((item) => item.SKU === product.SKU);
-    console.log('matchedProduct', matchedProduct);
 
     if (matchedProduct) {
       const existingDocRef = doc(basketsRef, matchedProduct.id);
@@ -41,12 +39,16 @@ export default async (req, res) => {
         console.log(`SKU ${product.SKU} found, quantity decreased!`);
         res.status(200).send({ message: 'Product quantity decreased successfully!', data: matchedProduct });
       } else {
-        await deleteDoc(existingDocRef);
-
-        const docRef = doc(bucketRef, product.SKU);
-        await updateDoc(docRef, {
+        try {
+          const docRef = doc(bucketRef, matchedProduct.SKU);
+          await updateDoc(docRef, {
             value: increment(-1)
           });
+
+          await deleteDoc(existingDocRef);
+        } catch (err) {
+          console.log('err', err)
+        }
         console.log(`SKU ${product.SKU} found, document deleted!`);
         res.status(200).send({ message: 'Product deleted from basket successfully!', data: matchedProduct });
       }

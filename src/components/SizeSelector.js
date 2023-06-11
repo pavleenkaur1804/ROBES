@@ -19,7 +19,7 @@ const SizeSelector = ({ productId, sizes, item, onChange }) => {
     if (session) {
       const updateSize = async () => {
         try {
-          await axios.post('api/updateSize', { session, productId, selectedSize: item.selectedSize })
+          await axios.post('api/updateSize', { session, productId, selectedSize: item.selectedSize, sizes })
         } catch (err) {
           console.log('err', err)
         }

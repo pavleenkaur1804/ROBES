@@ -1,12 +1,13 @@
-import { collection, deleteDoc, doc, addDoc, getDocs, query, where, setDoc, updateDoc, increment } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, updateDoc, increment } from "firebase/firestore";
 import { default as db } from '../../../firebase';
+
+/* This Api handles Saving the Basket Items of the Active User */
 
 export default async (req, res) => {
   try {
     const { session, product, selectedSize } = req.body
     /* QUERING USER referenced Product SKU DATA
     Check if already present */
-console.log('session', session)
     const userBasketRef = collection(db, "users");
     const usersDocRef = doc(userBasketRef, session?.user?.email);
     const basketsRef = collection(usersDocRef, "basket");
@@ -16,7 +17,6 @@ console.log('session', session)
     const allProductSKU = []
     querySnapshot1.forEach((doc) => {
       try {
-        console.log('doc.id', doc.id)
         const document ={
             SKU: doc.data().productSKU,
             id: doc.id
@@ -27,8 +27,8 @@ console.log('session', session)
       }
 
     });
+
     const matchedProduct = allProductSKU.find((item) => item.SKU === product.SKU);
-    console.log('matchedProduct', matchedProduct)
 
     if (matchedProduct) {
       const existingDocRef = doc(basketsRef, matchedProduct.id);

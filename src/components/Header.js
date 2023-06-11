@@ -7,12 +7,8 @@ import UserPlusIcon from '@heroicons/react/24/outline/UserPlusIcon';
 import ArchiveBoxIcon from '@heroicons/react/24/solid/ArchiveBoxIcon';
 import StarIcon from '@heroicons/react/24/solid/HeartIcon';
 import ListBulletIcon from '@heroicons/react/24/solid/ListBulletIcon';
-import QueueListIcon from '@heroicons/react/24/solid/QueueListIcon';
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useRouter } from 'next/navigation';
-import { selectBasketItems } from "../slices/basketSlice";
-import { useSelector } from "react-redux";
-import { query } from 'firebase/firestore';
 import MagnifyingGlassIcon from '@heroicons/react/24/outline/MagnifyingGlassIcon';
 import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 
@@ -21,7 +17,6 @@ function Header() {
     const { data: session } = useSession()
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const router = useRouter();
-    const basketItems = useSelector(selectBasketItems);
     const [collectionTotal, setCollectionTotal] = useState(0);
     const [cartonTotal, setCartonTotal] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
@@ -47,12 +42,10 @@ function Header() {
     }, []);
 
     return (
-        <div className="overflow-x-hidden min-w-0 font-mono">
-            {/* Header code */}
+        <div className="overflow-x-hidden min-w-0 font-sans">
             <header
                 className='sticky top-0 p-4 bg-white min-w-0 overflow-x-hidden'
                 onMouseLeave={() => setDropdownOpen(false)}>
-                {/* Top NavBar*/}
                 <div className="flex items-center bg-white space-x-4 ">
                     <div className={`mt-2 flex items-center ${setIsSmallScreen ? 'mr-auto' : 'flex-grow'}`}>
                         {!expanded && (<Image
@@ -61,11 +54,10 @@ function Header() {
                             src='https://firebasestorage.googleapis.com/v0/b/project-1234-1a50f.appspot.com/o/Screenshot%202023-06-09%20at%2012.12.57%20AM.png?alt=media&token=b236a106-1d03-4e01-b44c-ad269a1cf063'
                             width={90}
                             height={40}
-                            className="cursor-pointer ml-auto"
-                            alt=""
+                            className="cursor-pointer ml-auto h-auto"
+                            alt="LOGO"
                         />)}
                     </div>
-                    {/* Search Bar */}
                     {expanded ? (
                         <form className="flex flex-grow"
                         >
