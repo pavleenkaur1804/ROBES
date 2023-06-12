@@ -5,8 +5,8 @@ import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import { default as db } from '../../firebase';
-import {  
-    addItemToCollection, 
+import {
+    addItemToCollection,
 } from "../utility/function";
 import HeartSolidIcon from '@heroicons/react/24/solid/HeartIcon';
 import HeartOutlineIcon from '@heroicons/react/24/outline/HeartIcon';
@@ -22,6 +22,24 @@ const Search = () => {
     const encodedSearchQuery = encodeURI(searchQuery || "");
     const router = useRouter();
     const [loading, setLoading] = useState(true); // Add loading state
+    const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSmallScreen(window.innerWidth <= 550);
+        };
+
+        // Call the handleResize function initially to set the initial value of isSmallScreen
+        handleResize();
+
+        // Add event listener for window resize and call handleResize function on resize
+        window.addEventListener('resize', handleResize);
+
+        // Clean up event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchSearchResults = async () => {
@@ -35,55 +53,55 @@ const Search = () => {
                 setSearchResults(searchResponse.data.docs);
                 setLoading(false);
                 const userCollectionRef = collection(db, "users");
-                    const usersDocRef = doc(userCollectionRef, session.user.email);
-                    const collectionRef = collection(usersDocRef, 'collection');
-                    const userBasketRef = collection(db, "users");
-                    const userDocRef = doc(userBasketRef, session.user.email);
-                    const basketRef = collection(userDocRef, 'basket');
-                    onSnapshot(collectionRef, (snapshot) => {
-                        setSearchResults((prevProduct) => {
-                            const updatedProductArray = [...prevProduct];
-                            snapshot.docChanges().forEach((change) => {
-                                const docData = change.doc.data();
-                                const productSKU = docData.productSKU;
+                const usersDocRef = doc(userCollectionRef, session.user.email);
+                const collectionRef = collection(usersDocRef, 'collection');
+                const userBasketRef = collection(db, "users");
+                const userDocRef = doc(userBasketRef, session.user.email);
+                const basketRef = collection(userDocRef, 'basket');
+                onSnapshot(collectionRef, (snapshot) => {
+                    setSearchResults((prevProduct) => {
+                        const updatedProductArray = [...prevProduct];
+                        snapshot.docChanges().forEach((change) => {
+                            const docData = change.doc.data();
+                            const productSKU = docData.productSKU;
 
-                                const matchingProductIndex = updatedProductArray.findIndex((item) => item.SKU === productSKU);
+                            const matchingProductIndex = updatedProductArray.findIndex((item) => item.SKU === productSKU);
 
-                                if (matchingProductIndex !== -1) {
-                                    const updatedProduct = { ...updatedProductArray[matchingProductIndex] };
+                            if (matchingProductIndex !== -1) {
+                                const updatedProduct = { ...updatedProductArray[matchingProductIndex] };
 
-                                    updatedProduct.collection = change.type === "removed" ? false : true;
+                                updatedProduct.collection = change.type === "removed" ? false : true;
 
-                                    updatedProductArray[matchingProductIndex] = updatedProduct;
-                                }
+                                updatedProductArray[matchingProductIndex] = updatedProduct;
+                            }
 
-                            });
-                            return updatedProductArray;
-                        })
-                    });
+                        });
+                        return updatedProductArray;
+                    })
+                });
 
-                    onSnapshot(basketRef, (snapshot) => {
-                        setSearchResults((prevProduct) => {
-                            const updatedProductArray = [...prevProduct];
-                            snapshot.docChanges().forEach((change) => {
-                                const docData = change.doc.data();
-                                const productSKU = docData.productSKU;
+                onSnapshot(basketRef, (snapshot) => {
+                    setSearchResults((prevProduct) => {
+                        const updatedProductArray = [...prevProduct];
+                        snapshot.docChanges().forEach((change) => {
+                            const docData = change.doc.data();
+                            const productSKU = docData.productSKU;
 
-                                const matchingProductIndex = updatedProductArray.findIndex((item) => item.SKU === productSKU);
-                                if (matchingProductIndex !== -1) {
-                                    const updatedProduct = { ...updatedProductArray[matchingProductIndex] };
+                            const matchingProductIndex = updatedProductArray.findIndex((item) => item.SKU === productSKU);
+                            if (matchingProductIndex !== -1) {
+                                const updatedProduct = { ...updatedProductArray[matchingProductIndex] };
 
-                                    updatedProduct.quantity = change.type === "removed" ? 0 : docData.quantity;
+                                updatedProduct.quantity = change.type === "removed" ? 0 : docData.quantity;
 
-                                    updatedProductArray[matchingProductIndex] = updatedProduct;
-                                }
-                            });
-                            return updatedProductArray;
-                        })
-                    });
+                                updatedProductArray[matchingProductIndex] = updatedProduct;
+                            }
+                        });
+                        return updatedProductArray;
+                    })
+                });
 
             } catch (error) {
-              console.log('error', error)
+                console.log('error', error)
             }
         };
         fetchSearchResults();
@@ -91,74 +109,74 @@ const Search = () => {
 
     return (
         <div>
-           {loading=== true? 
-           <div
-           className="flex justify-center items-center"
-           >
-           <Loading/>
-           </div>
-          : <>
-           <div
-        className="flex justify-between font-sans">
-        <h1
-        className="block ml-6 text-gray-400 text-xs align-middle"
-        >{searchResults.length ? `${searchResults.length} products found` : ""}</h1> 
-        </div>
-       
-             <div
-        className={searchResults.length ? 'grid sm: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-col-5 gap-1': 'flex justify-center items-center'}
-        >
-            {(searchResults.length ? searchResults.map((result) => (
+            {loading === true ?
                 <div
-                    className=""
-                    key={result.SKU}
-                    >
-                    <div className='flex flex-col bg-white p-11'>
-                        <Image
-                          onClick={() => {
-                            const encodeSearchQuery = encodeURI(result.SKU);
-                            router.push(`/product?q=${encodeSearchQuery}`);
-                          }} 
-                        src={result.image[3]} height={200} width={200} objectFit="contain" />
-                        <h1 className='my-3'>{result.name}</h1>
-                        <p className='text-xs my-2'>{`Color: ${result.color}`}</p>
-                       
-                        <div
-                                className="flex flex-row space-x-12"
-                        >
-                             <p className='text-xs my-2'>{`Brand: ${result.brand}`}</p>
-                        </div>
-                        <div
-                        className="flex flex-row space-x-24"
-                        >
-                             <div className=' flex mb-5 text-xs my-2'>
-                            {`$ ${result.price}`}
-                        </div>
-                        <div 
-                             className="flex"
-                             >
-                            {result.collection === true ? <HeartSolidIcon
-                                onClick={() => addItemToCollection(result, session)}
-                                className="h-6 cursor-pointer text-wendge" /> : <HeartOutlineIcon
-                                onClick={
-                                    () => {
-                                        if(!session) router.push('/profile')
-                                        else {
-                                            addItemToCollection(result, session)
-                                        }
-                                    }}
-                                className="h-6 cursor-pointer text-wendge" />}
-                            </div>
-                        </div>            
-                       
-                    </div>
+                    className="flex justify-center items-center"
+                >
+                    <Loading />
                 </div>
+                : <>
+                    <div
+                        className="flex justify-between font-sans">
+                        <h1
+                            className="block ml-6 text-gray-400 text-xs align-middle"
+                        >{searchResults.length ? `${searchResults.length} products found` : ""}</h1>
+                    </div>
 
-            )) :  <NoResult/>)}
+                    <div
+                        className={searchResults.length ? 'grid sm: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-col-5 gap-1' : 'flex justify-center items-center'}
+                    >
+                        {(searchResults.length ? searchResults.map((result) => (
+                            <div
+                                className=""
+                                key={result.SKU}
+                            >
+                                <div className='flex flex-col bg-white p-11'>
+                                    <Image
+                                        onClick={() => {
+                                            const encodeSearchQuery = encodeURI(result.SKU);
+                                            router.push(`/product?q=${encodeSearchQuery}`);
+                                        }}
+                                        src={result.image[3]} height={200} width={200} objectFit="contain" />
+                                    <h1 className='my-3'>{result.name}</h1>
+                                    <p className='text-xs my-2'>{`Color: ${result.color}`}</p>
+
+                                    <div
+                                        className="flex flex-row space-x-12"
+                                    >
+                                        <p className='text-xs my-2'>{`Brand: ${result.brand}`}</p>
+                                    </div>
+                                    <div
+                                        className={`flex flex-row ${isSmallScreen === true ? 'space-x-23' : 'space-x-24'}`}
+                                    >
+                                        <div className='mb-3 text-xs my-1 mr-12 whitespace-nowrap'>
+                                            {`₹ ${result.price}`}
+                                        </div>
+                                        <div
+                                            className="flex"
+                                        >
+                                            {result.collection === true ? <HeartSolidIcon
+                                                onClick={() => addItemToCollection(result, session)}
+                                                className="h-6 cursor-pointer text-wendge" /> : <HeartOutlineIcon
+                                                onClick={
+                                                    () => {
+                                                        if (!session) router.push('/profile')
+                                                        else {
+                                                            addItemToCollection(result, session)
+                                                        }
+                                                    }}
+                                                className="h-6 cursor-pointer text-wendge" />}
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        )) : <NoResult />)}
+                    </div>
+                </>}
         </div>
-           </>}
-        </div>
-       
+
     );
 };
 

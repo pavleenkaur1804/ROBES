@@ -18,13 +18,12 @@ import Loading from "../components/Loading";
 const Products = ({ products, sizes, colors, priceRanges }) => {
 
     const { data: session } = useSession();
-    const currentLink = window.location.href;
-    console.log('currentLink', currentLink); 
     const [product, setProduct] = useState(products);
     const [filteredProducts, setFilteredProducts] = useState(products);
     const [displayFilteredProducts, setDisplayFilteredProducts] = useState(products)
     const [selectedSort, setSelectedSort] = useState('newProduct');
     const [loading, setLoading] = useState(true); // Add loading state
+    const [isSmallScreen, setIsSmallScreen] = useState(false);
     const router = useRouter();
 
     const handleSortChange = event => {
@@ -79,96 +78,113 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
             setLoading(false); // Set loading state to true before making the API call
         }
 
-    }, [session,selectedSort]);
+    }, [session, selectedSort]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSmallScreen(window.innerWidth <= 550);
+        };
+
+        // Call the handleResize function initially to set the initial value of isSmallScreen
+        handleResize();
+
+        // Add event listener for window resize and call handleResize function on resize
+        window.addEventListener('resize', handleResize);
+
+        // Clean up event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     return (
         <div
-            className='font-mono'
-        >        
-            {loading === true ? 
-            <div
-            className="flex justify-center items-center"
-            >
-                <Loading />
-            </div>
-            : (displayFilteredProducts && displayFilteredProducts.length ? <>
+            className='font-sans'
+        >
+            {loading === true ?
                 <div
-                    className="flex">
-                    <h1
-                        className="block ml-5 text-gray-400 text-xs align-middle"
-                    >{displayFilteredProducts && displayFilteredProducts.length ? `${displayFilteredProducts.length} products found` : ""}</h1>
+                    className="flex justify-center items-center"
+                >
+                    <Loading />
                 </div>
-                <div className="flex font-mono">
-                    <div className='grid sm: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-col-5 gap-1'>
-                        {displayFilteredProducts.map((result) => (
-                            <div
-                                className="cursor-pointer"
-                                key={result.SKU}
-                            >
-                                <div className='flex flex-col p-11'>
-                                    <Image
+                : (displayFilteredProducts && displayFilteredProducts.length ? <>
+                    <div
+                        className="flex">
+                        <h1
+                            className="block ml-5 text-gray-400 text-xs align-middle"
+                        >{displayFilteredProducts && displayFilteredProducts.length ? `${displayFilteredProducts.length} products found` : ""}</h1>
+                    </div>
+                    <div className="flex">
+                        <div className='grid sm: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-col-5 gap-1'>
+                            {displayFilteredProducts.map((result) => (
+                                <div
                                     className="cursor-pointer"
+                                    key={result.SKU}
+                                >
+                                    <div className='flex flex-col p-11'>
+                                        <Image
+                                            className="cursor-pointer"
 
-                                        onClick={() => {
+                                            onClick={() => {
 
-                                            const encodeSearchQuery = encodeURI(result.SKU)
+                                                const encodeSearchQuery = encodeURI(result.SKU)
 
-                                            router.push(`/product?q=${encodeSearchQuery}`);
-                                        }
-                                        }
-                                        src={result.image[3]} height={200} width={222} alt={`${result.name}`} />
-                                    <h1 className='my-3'>{result.name}</h1>
-                                    <p className='text-xs my-2'>{`Color: ${result.color}`}</p>
-                                    <p className='text-xs my-2'>{`Brand: ${result.brand}`}</p>
-                                    <div
-                                        className="flex flex-row space-x-24"
-                                    >
-                                        <div className='mb-3 text-xs my-1 mr-12'>
-                                            {`₹ ${result.price}`}
-                                        </div>
-                                        <div className="flex">
-                                            {result.collection === true ? <HeartSolidIcon
-                                                onClick={() => 
-                                                    addItemToCollection(result, session)
-                                                }
-                                                className="h-7 cursor-pointer text-wendge" /> : <HeartOutlineIcon
-                                                onClick={
-                                                    () => {
-                                                        if(!session) router.push('/profile')
-                                                        else {
-                                                            addItemToCollection(result, session)
-                                                        }
+                                                router.push(`/product?q=${encodeSearchQuery}`);
+                                            }
+                                            }
+                                            src={result.image[3]} height={200} width={222} alt={`${result.name}`} />
+                                        <h1 className='my-3'>{result.name}</h1>
+                                        <p className='text-xs my-2'>{`Color: ${result.color}`}</p>
+                                        <p className='text-xs my-2'>{`Brand: ${result.brand}`}</p>
+                                        <div
+                                            className={`flex flex-row ${isSmallScreen === true ? 'space-x-23' : 'space-x-24'}`}
+                                        >
+                                            <div className='mb-3 text-xs my-1 mr-12 whitespace-nowrap'>
+                                                {`₹ ${result.price}`}
+                                            </div>
+                                            <div className="flex">
+                                                {result.collection === true ? <HeartSolidIcon
+                                                    onClick={() =>
+                                                        addItemToCollection(result, session)
                                                     }
-                                                   
-                                                }
-                                                className="h-7 cursor-pointer text-wendge" />}
+                                                    className="h-7 cursor-pointer text-wendge" /> : <HeartOutlineIcon
+                                                    onClick={
+                                                        () => {
+                                                            if (!session) router.push('/profile')
+                                                            else {
+                                                                addItemToCollection(result, session)
+                                                            }
+                                                        }
+
+                                                    }
+                                                    className="h-7 cursor-pointer text-wendge" />}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                        ))}
+                            ))}
+                        </div>
+                        <div
+                        >
+                            <SortSelector
+                                sort={SORTING}
+                                selectedSort={selectedSort}
+                                onChange={handleSortChange} />
+                            <ProductFilter
+                                products={product}
+                                onFilter={handleFilter}
+                                colors={colors}
+                                sizes={sizes}
+                                priceRanges={priceRanges}
+                            />
+                        </div>
                     </div>
-                    <div
-                    >
-                        <SortSelector
-                            sort={SORTING}
-                            selectedSort={selectedSort}
-                            onChange={handleSortChange} />
-                        <ProductFilter
-                            products={product}
-                            onFilter={handleFilter}
-                            colors={colors}
-                            sizes={sizes}
-                            priceRanges={priceRanges}
-                        />
-                    </div>
-                </div>
-            </> : <div
-            className="flex justify-center items-center"
-            >
-            <NoResult />
-            </div>)}
+                </> : <div
+                    className="flex justify-center items-center"
+                >
+                    <NoResult />
+                </div>)}
         </div>
     );
 };
@@ -254,7 +270,7 @@ export async function getServerSideProps(context) {
         });
 
     }
-console.log('arrayModifiedForBAsket', arrayModifiedForBasket)
+    console.log('arrayModifiedForBAsket', arrayModifiedForBasket)
     // Remove the timestamp property from each object in the products array
     productsWithoutTimestamp = session ? arrayModifiedForBasket.map(({ timestamp, ...rest }) => rest) : allProducts.map(({ timestamp, ...rest }) => rest)
 
