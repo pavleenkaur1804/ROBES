@@ -12,7 +12,7 @@ import SizeSelector from "../components/SizeSelector";
 
 function Collection() {
     const { data: session } = useSession()
-    const [loading, setLoading] = useState()
+    const [loading, setLoading] = useState(true)
     const [items, setItems] = useState([]);
     const [refresh, setRefresh] = useState();
     const [warning, setWarning] = useState(false)

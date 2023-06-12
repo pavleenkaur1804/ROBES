@@ -4,6 +4,7 @@ import { useSession, getSession, signIn } from 'next-auth/react'
 import { PlusIcon, ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { collection, doc, onSnapshot, getDocs, query, orderBy } from "firebase/firestore";
 import { default as db } from '../../firebase';
+import Loading from '../components/Loading';
 
 function Profile({ originalArray }) {
     const { data: session } = useSession();
@@ -98,22 +99,27 @@ function Profile({ originalArray }) {
                             return updatedProductArray;
                         })
                     });
-
+                    setLoading(false)
                 } catch (error) {
                     console.error(error);
                 }
             };
             fetchAddress();
-            setLoading(false)
+
         }
-    }, [session,selectedOption]);
+    }, [session, selectedOption]);
     return (
         <>
-         {session ? (
-                 <div
-            className='font-sans m-5'
-        >
-             <div
+
+            {loading === true ? <div
+                className='flex justify-center items-center'
+            >
+                <Loading />
+            </div> : (session ? (
+                <div
+                    className='font-sans m-5'
+                >
+                    <div
                         className='text-wendge text-sm p-6 space-y-2'
                     >
                         <h1
@@ -292,7 +298,7 @@ function Profile({ originalArray }) {
                             </div>
                         }
                     </div>
-        </div>)
+                </div>)
                 : <div
                     className='flex flex-grow justify-center items-center font-mono h-80'>
                     <div
@@ -300,10 +306,10 @@ function Profile({ originalArray }) {
                         className="cursor-pointer bg-wendge rounded-md text-gray-200 p-2 text-sm">
                         Please Login
                     </div>
-                </div>
-        }
+                </div>)
+            }
         </>
-        
+
     )
 }
 
