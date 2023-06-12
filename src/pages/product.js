@@ -136,13 +136,14 @@ const Product = () => {
                         key={displayProduct[0].SKU}
                         >
                             <div
-                           
+                            className="max-w-sm"
                             >
                             <Banner
-                            className={`flex ${isSmallScreen ? 'p-8': 'p-6'}`}  
+                            className={`flex ${isSmallScreen ? 'p-1': 'p-6'}`}  
                             images={displayProduct[0].image} 
                             height={200} 
-                            width={200} />
+                            width={200} 
+                            />
                             </div>
                              
                         <div className={`flex flex-col bg-white p-7 ${isSmallScreen ? 'flex-col justify-start ml-10' : 'flex-row'}`}>
