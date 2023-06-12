@@ -1,5 +1,5 @@
 /** This Component is responsible for rendering Carton Items that user (with an active session) has shortlisted for buying */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import Image from 'next/image'
 import axios from 'axios';
@@ -9,17 +9,22 @@ import useCartonListener from '../components/cartonListener';
 import { addItemToBasket, removeItemFromBasket } from "../utility/function"
 import SizeSelector from "../components/SizeSelector";
 
+
 const stripePromise = loadStripe(`${process.env.STRIPE_PUBLIC_KEY}`)
 
 function Checkout() {
     const { data: session } = useSession()
-    const rootRoute = window.location.pathname;
-    console.log(rootRoute);
     const [cartonItem, setCartonItem] = useState([]);
     const [cartonTotal, setCartonTotal] = useState(0)
     const [cartonPrice, setCartonPrice] = useState(0)
     useCartonListener(session, setCartonTotal, setCartonItem, setCartonPrice)
     const router = useRouter();
+    const [rootRoute, setRootRoute] = useState('');
+
+    useEffect(() => {
+        setRootRoute(window.location.origin);
+    }, []);
+
 
     const handleSizeChange = (item, size) => {
         const updatedCartonItem = cartonItem.map((cartonObject) => {
@@ -64,7 +69,9 @@ function Checkout() {
                             className='flex flex-col space-y-2'
                         >
                             {cartonItem.map((item, i) => (
-                                <div className="grid grid-cols-5 ml-6 mr-6">
+                                <div 
+                                key={item.SKU}
+                                className="grid grid-cols-5 ml-6 mr-6">
                                     {/* In Summary: Creating a grid which should span across 5 columns
                                the outer element has a CSS class grid-cols-6,
                                which specifies that the grid should have 6 columns.
@@ -72,7 +79,7 @@ function Checkout() {
                                indicating that it should span across 3 columns. 
                                The second  has col-span-2, indicating it spans 2 columns, and 
                                the third has col-span-1, meaning it spans only 1 column.*/}
-                                    <Image src={item.image[3]} height={200} width={200} />
+                                    <Image src={item.image[3]} height={200} width={200} alt={item.name}/>
                                     <div className="text-sm col-span-3 mx-5 my-1">
                                         <p
                                             className='mb-2'

@@ -1,4 +1,7 @@
 module.exports={
+    publicRuntimeConfig: {
+        baseUrl: process.env.BASE_URL || '',
+    },
     experimental:{
         appDir: true,
     },
