@@ -39,6 +39,7 @@ function Checkout() {
                 items: cartonItem,
                 email: session.user.email,
             })
+            console.log('checkout sesson', checkoutSession)
             router.push(checkoutSession.data.url);
         } catch (err) {
             console.log('err', err)

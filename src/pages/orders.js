@@ -6,6 +6,7 @@ import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import Order from '../components/Order';
 
 function Orders({ orders }) {
+    console.log('orders', orders)
     const { data: session } = useSession();
     return (
         <div>
@@ -55,7 +56,7 @@ export async function getServerSideProps(context) {
         collection(db, 'users', session.user.email, 'orders'),
         orderBy('timestamp', 'desc')
     ));
-
+console.log('stripeOrders', stripeOrders)
     const orders = await Promise.all(
         stripeOrders.docs.map(async (order) => ({
             id: order.id,
@@ -70,7 +71,7 @@ export async function getServerSideProps(context) {
             ).data,
         }))
     )
-
+console.log('orders', orders)
     return {
         props: {
             orders,

@@ -18,7 +18,7 @@ export default async (req, res) => {
                 unit_amount: item.price * 100,
             }
         }))
-
+console.log('transformed', transformedItems)
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             // shipping_options: ['shr_1Mwl9pSJxRLy98VhcVoLmxMk'],
@@ -34,6 +34,7 @@ export default async (req, res) => {
                 images: JSON.stringify(items.map(item => item.image[3])),
             }
         })
+        console.log('session', session)
         res.status(200).json({ url: session.url })
     } catch (err) {
         console.log('err in create session', err)

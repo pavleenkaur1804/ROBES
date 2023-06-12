@@ -185,11 +185,7 @@ const Product = () => {
                                         ()=>{
                                             if(!session) router.push('/profile')
                                             else {
-                                                if(displayProduct[0].selectedSize === undefined){
-                                                    setWarning(true)
-                                                } else {
-                                                    addItemToBasket(displayProduct[0], displayProduct[0].selectedSize, session)
-                                                }
+                                                addItemToCollection(displayProduct[0], session)
                                             }
                                         }
                                     }

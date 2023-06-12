@@ -17,15 +17,17 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
 
 const fulfillOrder = async (session, items, res) => {
-    console.log('session.total_details.amount_shipping', session.total_details.amount_shipping)
-    console.log('session.amount_total', session.amount_total)
-    console.log('session.metadata.images', session.metadata.images)
-    console.log('admin.firestore.FieldValue.serverTimestamp()', admin.firestore.FieldValue.serverTimestamp())
-    console.log('items', items)
+    console.log('session.total_details.amount_shipping', session.total_details.amount_shipping);
+    console.log('session.amount_total', session.amount_total);
+    console.log('session.metadata.images', session.metadata.images);
+    console.log('admin.firestore.FieldValue.serverTimestamp()', admin.firestore.FieldValue.serverTimestamp());
+    console.log('items', items);
+
+    let responseSent = false; // Flag variable to track if response has been sent
 
     try {
         for (let i = 0; i < items.length; i++) {
-            console.log('inside For')
+            console.log('inside For');
             await removeBasket({
                 body: {
                     email: session.metadata.email,
@@ -34,25 +36,42 @@ const fulfillOrder = async (session, items, res) => {
             }, res);
         }
     } catch (error) {
-        console.log('error in for loop remove basket', error)
+        console.log('error in for loop remove basket', error);
+        if (!responseSent) {
+            responseSent = true;
+            return res.status(400).send(`Webhook Error: ${error.message}`);
+        }
     }
-   
-   
-    return app
-        .firestore()
-        .collection('users')
-        .doc(session.metadata.email)
-        .collection('orders').doc(session.id).set({
-            amount: session.amount_total / 100,
-            amount_shipping: session.total_details.amount_shipping / 100,
-            images: JSON.parse(session.metadata.images),
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
-        })
-        .then(() => {
-            console.log(`SUCCESS: Order ${session.id} had been added to the DB`)
-        })
-        .catch((err)=> console.log('err', err))
-}
+
+    try {
+        await app
+            .firestore()
+            .collection('users')
+            .doc(session.metadata.email)
+            .collection('orders')
+            .doc(session.id)
+            .set({
+                amount: session.amount_total / 100,
+                amount_shipping: session.total_details.amount_shipping / 100,
+                images: JSON.parse(session.metadata.images),
+                timestamp: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+        console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
+        if (!responseSent) {
+            responseSent = true;
+            return res.status(200).send('Order successfully fulfilled.');
+        }
+    } catch (error) {
+        console.log('error in setting order data', error);
+        if (!responseSent) {
+            responseSent = true;
+            return res.status(400).send(`Webhook Error: ${error.message}`);
+        }
+    }
+};
+
+
 
 export default async (req, res) => {
     if (req.method === 'POST') {
