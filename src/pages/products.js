@@ -18,6 +18,8 @@ import Loading from "../components/Loading";
 const Products = ({ products, sizes, colors, priceRanges }) => {
 
     const { data: session } = useSession();
+    const currentLink = window.location.href;
+    console.log('currentLink', currentLink); 
     const [product, setProduct] = useState(products);
     const [filteredProducts, setFilteredProducts] = useState(products);
     const [displayFilteredProducts, setDisplayFilteredProducts] = useState(products)
@@ -162,7 +164,11 @@ const Products = ({ products, sizes, colors, priceRanges }) => {
                         />
                     </div>
                 </div>
-            </> : <NoResult />)}
+            </> : <div
+            className="flex justify-center items-center"
+            >
+            <NoResult />
+            </div>)}
         </div>
     );
 };

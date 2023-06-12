@@ -139,10 +139,10 @@ const Product = () => {
                            
                             >
                             <Banner
-                            className={`flex ${isSmallScreen ? 'p-8': 'p-7'}`}  
+                            className={`flex ${isSmallScreen ? 'p-8': 'p-6'}`}  
                             images={displayProduct[0].image} 
-                            height={isSmallScreen ? 300: 400} 
-                            width={isSmallScreen? 400: 800} />
+                            height={200} 
+                            width={200} />
                             </div>
                              
                         <div className={`flex flex-col bg-white p-7 ${isSmallScreen ? 'flex-col justify-start ml-10' : 'flex-row'}`}>

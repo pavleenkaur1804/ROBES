@@ -13,6 +13,8 @@ const stripePromise = loadStripe(`${process.env.STRIPE_PUBLIC_KEY}`)
 
 function Checkout() {
     const { data: session } = useSession()
+    const rootRoute = window.location.pathname;
+    console.log(rootRoute);
     const [cartonItem, setCartonItem] = useState([]);
     const [cartonTotal, setCartonTotal] = useState(0)
     const [cartonPrice, setCartonPrice] = useState(0)
@@ -38,6 +40,7 @@ function Checkout() {
             const checkoutSession = await axios.post('/api/create-checkout-session', {
                 items: cartonItem,
                 email: session.user.email,
+                rootRoute
             })
             console.log('checkout sesson', checkoutSession)
             router.push(checkoutSession.data.url);

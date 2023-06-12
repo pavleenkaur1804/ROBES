@@ -5,7 +5,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"
 export default function Banner({images, height, width, className }) {
     return (
         <div className={`relative ${`h-${height} w-${width}`} ${className}`}>
-            <div className='absolute w-full h-32 bottom-0'/>
+            <div className='absolute w-80 h-32 bottom-0'/>
             <Carousel
                 autoPlay
                 infiniteLoop
